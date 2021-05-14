@@ -1,6 +1,13 @@
 # TodoApp
+Open project directory
 
-First install all packages by
+Create Python virtualenv, 
+    virtualenv venv/
+    
+Activate the virtual environment
+    source venv/bin/activate
+
+Install all packages by
     pip install -r requirements.txt
 
 then migrate the databse by

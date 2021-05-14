@@ -1,0 +1,44 @@
+{% extends 'auth.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<header class="card-header">
+    <p class="card-header-title has-text-centered">
+      Register
+    </p>
+</header>
+<div class="card-content">
+    <form method="POST" action="/register">
+        <div class="field">
+            <label class="label">Username</label>
+            <div class="control">
+                <input class="input" type="text" name="username" placeholder="Username">
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Email</label>
+            <div class="control">
+                <input class="input" type="email" name="email" placeholder="Email">
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Password</label>
+            <div class="control">
+              <input class="input" type="password" name="password" placeholder="Password">
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Confirm Password</label>
+            <div class="control">
+                <input class="input" type="password" name="confirm_password" placeholder="Password">
+            </div>
+        </div>
+        <div class="field">
+            <button class="button is-primary is-fullwidth" type="submit">
+                Register
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

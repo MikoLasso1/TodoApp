@@ -1,0 +1,311 @@
+{% extends 'main.html' %}
+
+{% block title %}Todos{% endblock %}
+
+{% block content %}
+<section class="hero is-primary">
+    <div class="hero-body">
+      <p class="title">
+        Welcome, {{ user.username }} 
+        <a href="{{ url_for('auth.logout') }}" class="button is-danger is-small mt-2 ml-1" aria-label="more options">
+            Logout
+        </a>
+      </p>
+      <p class="subtitle">
+        Todos Test Project
+      </p>
+    </div>
+</section>
+<header class="card-header">
+    <p class="card-header-title">
+      Todos
+    </p>
+    <button class="button is-success is-small mr-1 mt-1" aria-label="more options" @click="openCreateModal">
+        Create TODO
+    </button>
+</header>
+<nav class="panel">
+    <div v-if="todos.length > 0">
+        <div class="panel-block" v-for="todo in todos" :key="todo.id">
+            <div>
+                <p>
+                    Done:
+                    <input type="checkbox" @click="markComplete(todo)" :checked="todo.is_completed" title="Mark todo as completed">
+                </p>
+            </div>
+            <div :class="{'mark-complete': todo.is_completed}">
+                <b>[[ todo.title ]]</b>
+                <br/>
+                [[ todo.description ]]
+            </div>
+            <div class="buttons are-small" style="margin-left: auto">
+                <button class="button is-link" @click="openEditModal(todo)">Edit</button>
+                <button class="button is-danger" @click="openDeleteModal(todo)">Delete</button>
+            </div>
+        </div>
+    </div>
+    <div v-else>
+        <p class="has-text-centered px-4 py-4">No Todo Found in database!</p>
+    </div>
+</nav>
+
+
+<div class="modal" :class="{'is-active': createModal}">
+    <div class="modal-background" @click="createModal = false"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Create TODO</p>
+            <button class="delete" aria-label="close" @click="createModal = false"></button>
+        </header>
+        <section class="modal-card-body">
+            <form>
+                <div class="field">
+                    <label class="label">Todo Title</label>
+                    <div class="control">
+                      <input class="input" type="text" placeholder="Todo Title" v-model="editingTodo.title">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Todo Description</label>
+                    <div class="control">
+                      <input class="input" type="text" placeholder="Todo Description" v-model="editingTodo.description">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Todo Due Date</label>
+                    <div class="control">
+                      <input class="input" type="date" v-model="editingTodo.due_date">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Priority</label>
+                    <div class="control">
+                        <select class="input" v-model="editingTodo.position">
+                            <option value="">Top priority</option>
+                            <option v-for="todo in todos" :key="todo.id" :value="todo.position">
+                                Before [[ todo.title ]]
+                            </option>
+                            <option value="last">Last priority</option>
+                        </select>
+                    </div>
+                </div>
+            
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-success" type="button" @click="createTodo">Create</button>
+            <button class="button" type="button" @click="createModal = false">Cancel</button>
+        </form>
+        </footer>
+    </div>
+</div>
+
+<div class="modal" :class="{'is-active': editModal}">
+    <div class="modal-background" @click="editModal = false"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Edit TODO</p>
+            <button class="delete" aria-label="close" @click="editModal = false"></button>
+        </header>
+        <section class="modal-card-body">
+            <form>
+                <div class="field">
+                    <label class="label">Todo Title</label>
+                    <div class="control">
+                      <input class="input" type="text" placeholder="Todo Title" v-model="editingTodo.title">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Todo Description</label>
+                    <div class="control">
+                      <input class="input" type="text" placeholder="Todo Description" v-model="editingTodo.description">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Todo Due Date</label>
+                    <div class="control">
+                      <input class="input" type="date" v-model="editingTodo.due_date">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Priority</label>
+                    <div class="control">
+                        <select class="input" v-model="editingTodo.position">
+                            <option value="">Top priority</option>
+                            <option v-for="todo in todos" :key="todo.id" :value="todo.id" v-if="todo.id != editingTodo.id">
+                                Before [[ todo.title ]]
+                            </option>
+                            <option value="last">Last priority</option>
+                        </select>
+                    </div>
+                </div>
+            
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-success" type="button" @click="editTodo">Edit</button>
+            <button class="button" type="button" @click="editModal = false">Cancel</button>
+        </form>
+        </footer>
+    </div>
+</div>
+
+<div class="modal" :class="{'is-active': deleteModal}">
+    <div class="modal-background" @click="deleteModal = false"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Delete TODO</p>
+            <button class="delete" aria-label="close" @click="deleteModal = false"></button>
+        </header>
+        <section class="modal-card-body">
+            <p>Are you sure you want to delete todo: [[ editingTodo.title ]]?</p>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-danger" type="button" @click="deleteTodo">Delete</button>
+            <button class="button" type="button" @click="deleteModal = false">Cancel</button>
+        </footer>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var app = new Vue({
+        el: '#vue',
+        delimiters: ['[[', ']]'],
+        data: {
+            todos: [],
+            createModal: false,
+            editModal: false,
+            deleteModal: false,
+            editingTodo: null,
+        },
+        mounted() {
+            this.getTodos();
+            this.resetEditingModal();
+        },
+        methods: {
+            openCreateModal() {
+                this.resetEditingModal();
+                this.createModal = true;
+            },
+            openEditModal(todo) {
+                this.editModal = true;
+                this.editingTodo = todo;
+                console.log(todo)
+            },
+            openDeleteModal(todo) {
+                this.deleteModal = true;
+                this.editingTodo = todo;
+            },
+            resetEditingModal() {
+                this.editingTodo = {
+                    title: '',
+                    description: '',
+                    is_completed: false,
+                    due_date: '',
+                    position: ''
+                };
+            },
+            createTodo() {
+                if (this.editingTodo.title != '' && this.editingTodo.description != '') {
+                    this.addTodo();
+                    this.resetEditingModal();
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Please fill in the required fields',
+                        icon: 'error'
+                    });
+                }
+                
+                this.createModal = false;
+            },
+            getTodos() {
+                axios.get('{{ url_for("main.todos") }}')
+                    .then(response => {
+                        this.todos = response.data.todos;
+                    }).catch(error => {
+                        console.log(error);
+                    });
+            },
+            addTodo() {
+                axios.post('{{ url_for("main.todos") }}', this.editingTodo)
+                    .then(response => {
+                        if (response.data.id != undefined) {
+                            //this.todos.unshift(response.data);
+                            this.getTodos();
+                            Swal.fire({
+                                title: 'Success!',
+                                text: "Todo Created",
+                                icon: 'success'
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: response.data.msg,
+                                icon: 'error'
+                            });
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                    });
+                this.resetEditingModal();
+            },
+            markComplete(todo) {
+                todo.is_completed = !todo.is_completed;
+                this.updateTodo(todo);
+            },
+            editTodo() {
+                this.updateTodo(this.editingTodo);
+                this.resetEditingModal();
+            },
+            updateTodo(todo) {
+                this.editModal = false;
+                axios.post(`/todo/${todo.id}`, todo)
+                    .then(response => {
+                        if (response.data.id != undefined) {
+                            this.getTodos();
+                            Swal.fire({
+                                title: 'Success!',
+                                text: "Todo Updated",
+                                icon: 'success'
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: response.data.msg,
+                                icon: 'error'
+                            });
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                    });
+            },
+            deleteTodo() {
+                this.deleteModal = false;
+                axios.post(`/todo/delete/${this.editingTodo.id}`, this.editingTodo)
+                    .then(response => {
+                        if (response.data.status == 'success') {
+                            this.todos.splice(this.todos.indexOf(this.editingTodo), 1);
+                            Swal.fire({
+                                title: 'Success!',
+                                text: `Todo ${response.data.deleted.title} deleted!`,
+                                icon: 'success'
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: response.data.msg,
+                                icon: 'error'
+                            });
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                    });
+            }
+        }
+    });
+</script>
+{% endblock %}
